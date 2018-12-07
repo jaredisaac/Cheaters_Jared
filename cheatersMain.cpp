@@ -1,21 +1,15 @@
+// Jared Vochoska - jiv329
 #include <iostream>
-#include <sys/types.h>
 #include <dirent.h>
-#include <errno.h>
 #include <vector>
-#include <string>
 #include <fstream>
+#include "hashTable.h"
 
 using namespace std;
 
-int myExponent(int base, int power) {
-    int result = 1;
-    for (int i = 0; i < power; i++)
-        result = result * base;
-    return result;
-}
 
-
+// function getdir
+// attempts to open specified directory path and populate passed vector with all file names in directory
 int getdir (string dir, vector<string> &files) {
     DIR *dp;
     struct dirent *dirp;
@@ -32,28 +26,6 @@ int getdir (string dir, vector<string> &files) {
 }
 
 
-unsigned long int myHash (const string &input, int tableSize) {
-    unsigned long int returnKey = 0;
-    for (int i = 0; i < input.length(); i++)
-        returnKey += (input[input.length() - i - 1] * 11) % tableSize;
-    return returnKey;
-}
-
-
-/* class hashTable {
-public:
-    hashTable() {
-        for (int i = 0; i < hashTSize; i++)
-            map[i] = NULL;
-    }
-
-    int hashSize() {
-        return hashTSize;
-    }
-
-private:
- */
-
 int main(int argc, char *argv[]) {
 
     argc = 4;
@@ -64,42 +36,29 @@ int main(int argc, char *argv[]) {
     if (argc < 4)
         return 1;   // Only continue with program if proper number of arguments have been given
 
-    typedef struct hashNode {
-        hashNode *next;
-        int data;
-    } hashNode;
-
-    const int hashTSize = 300000;
-    hashNode *map[hashTSize];
-    for (int i = 0; i < hashTSize; i++)
-        map[i] = NULL;
-
-    // hashTable HashTable;
+    hashTable *h = new hashTable;
 
     const string filePath = "sm_doc_set";
     const int chunkSize = atoi("6");
     const int cheatMin = atoi("200");
+    const int tableSize = h->getTableSize();
 
 
     // const int chunkSize = atoi(argv[2]);
     // const int cheatMin = atoi(argv[3]);
-    // const int hashSize = HashTable.hashSize();
 
     vector<string> files;
     // getdir(argv[1], files);
     getdir(filePath, files);
     files.erase(files.begin(), files.begin() + 2);  // Take out . and .. from list
-    for (int i = 0;i < files.size();i++)
-        cout << i << files[i] << endl;
 
+    // Go through each file in directory and populate hash table with chunk instances
     for (int i = 0; i < files.size(); i++) {
         string fName = filePath + "/" + files[i];
-        cout << "opening: " << fName << endl;
         ifstream inFile;
         inFile.open(fName.c_str());
         vector<string> chunk;
         string temp;
-        unsigned long int key;
         // read in file chunks and populate hash table
         while (inFile) {
             while (chunk.size() < chunkSize && inFile) {
@@ -109,44 +68,19 @@ int main(int argc, char *argv[]) {
             string wordChunk;
             for (int j = 0; j < chunk.size(); j++)
                 wordChunk = wordChunk + chunk[j];
-            // unsigned long int key = myHash(wordChunk, hashTSize);
-            key = myHash(wordChunk, hashTSize);
-            hashNode *ptr = map[key];
-            if (map[key] != NULL) {
-                if (map[key]->data != i) {
-                    ptr = new hashNode;
-                    ptr->data = i;
-                    ptr->next = map[key];
-                    map[key] = ptr;
-                }
-            } else {
-                ptr = new hashNode;
-                ptr->data = i;
-                ptr->next = map[key];
-                map[key] = ptr;
-            }
-            chunk.erase(chunk.begin());
-            // hashTable[hash(chunk, hashTableSize)] = i;
+            // call hashing function
+            h->myHash(wordChunk, i);
+
+            chunk.erase(chunk.begin());   // move window
             // insert into hash table now
         }
-        cout << key << endl;
         inFile.close();
     }
 
-    vector<int> collisions;
-
-    for (int index = 0; index < hashTSize; index++) {
-        if (index == 27709)
-            cout << map[index] << endl;
-        if (map[index] != NULL) {
-            // cout << "here" << endl;
-            if (map[index]->next != NULL) {
-                collisions.push_back(map[index]->data);
-                collisions.push_back((map[index]->next)->data);
-                collisions.push_back(9999);
-            }
-        }
-    }
-
+    // obtain results based on minimum similarity value set by user
+    vector<string> results = h->traverseMap(files, cheatMin);
+    // print results to console in descending order of similarities
+    for (int i = 0; i < results.size(); i++)
+        cout << results[i] << endl;
     return 0;
 }
