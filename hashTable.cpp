@@ -1,6 +1,12 @@
 // Jared Vochoska - jiv329
 #include "hashTable.h"
+#include <vector>
+#include <cstdlib>
+#include <stdio.h>
 #include <algorithm>
+#include <stdlib.h>
+#include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -93,7 +99,9 @@ vector<string> hashTable::traverseMap(const vector<string> &files, int min) {
             for (int j = 0; j < files.size(); j++) {
                 if (collisionT[i][j] == *iter) {
                     string printOut;
-                    printOut += to_string(collisionT[i][j]);
+                    stringstream ss;
+                    ss << collisionT[i][j];
+                    printOut = ss.str();
                     printOut = printOut + ":" + files[i] + ", " + files[j];
                     retString.push_back(printOut);
                 }

@@ -1,4 +1,7 @@
 // Jared Vochoska - jiv329
+#include <sys/types.h>
+#include <errno.h>
+#include <string>
 #include <iostream>
 #include <dirent.h>
 #include <vector>
@@ -28,33 +31,24 @@ int getdir (string dir, vector<string> &files) {
 
 int main(int argc, char *argv[]) {
 
-    argc = 4;
-    // argv[2] = "6";
-    // argv[3] = "200";
-    // argv[1] = "sm_doc_set";
-
     if (argc < 4)
         return 1;   // Only continue with program if proper number of arguments have been given
 
+    if (atoi(argv[2]) < 0)
+	return 1;
     hashTable *h = new hashTable;
 
-    const string filePath = "sm_doc_set";
-    const int chunkSize = atoi("6");
-    const int cheatMin = atoi("200");
+    const int chunkSize = atoi(argv[2]);
+    const int cheatMin = atoi(argv[3]);
     const int tableSize = h->getTableSize();
 
-
-    // const int chunkSize = atoi(argv[2]);
-    // const int cheatMin = atoi(argv[3]);
-
     vector<string> files;
-    // getdir(argv[1], files);
-    getdir(filePath, files);
+    getdir(argv[1], files);
     files.erase(files.begin(), files.begin() + 2);  // Take out . and .. from list
 
     // Go through each file in directory and populate hash table with chunk instances
     for (int i = 0; i < files.size(); i++) {
-        string fName = filePath + "/" + files[i];
+        string fName = argv[1] + files[i];
         ifstream inFile;
         inFile.open(fName.c_str());
         vector<string> chunk;
