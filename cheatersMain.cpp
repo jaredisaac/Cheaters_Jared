@@ -94,10 +94,12 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < files.size(); i++) {
         string fName = filePath + "/" + files[i];
+        cout << "opening: " << fName << endl;
         ifstream inFile;
         inFile.open(fName.c_str());
         vector<string> chunk;
         string temp;
+        unsigned long int key;
         // read in file chunks and populate hash table
         while (inFile) {
             while (chunk.size() < chunkSize && inFile) {
@@ -107,36 +109,41 @@ int main(int argc, char *argv[]) {
             string wordChunk;
             for (int j = 0; j < chunk.size(); j++)
                 wordChunk = wordChunk + chunk[j];
-            unsigned long int key = myHash(wordChunk, hashTSize);
+            // unsigned long int key = myHash(wordChunk, hashTSize);
+            key = myHash(wordChunk, hashTSize);
+            hashNode *ptr = map[key];
             if (map[key] != NULL) {
-                if (map[key]->data == i)
-                    break;
+                if (map[key]->data != i) {
+                    ptr = new hashNode;
+                    ptr->data = i;
+                    ptr->next = map[key];
+                    map[key] = ptr;
+                }
+            } else {
+                ptr = new hashNode;
+                ptr->data = i;
+                ptr->next = map[key];
+                map[key] = ptr;
             }
-            hashNode *before = NULL, *ptr = map[key];
-            while (ptr != NULL) {
-                before = ptr;
-                ptr = ptr->next;
-            }
-            ptr = new hashNode;
-            ptr->data = i;
-            ptr->next = NULL;
-            if (before != NULL)
-                before->next = ptr;
             chunk.erase(chunk.begin());
             // hashTable[hash(chunk, hashTableSize)] = i;
             // insert into hash table now
         }
+        cout << key << endl;
         inFile.close();
     }
 
     vector<int> collisions;
 
-    for (int i = 0; i < 300000; i++) {
-        if (map[i] != NULL) {
-            if (map[i]->next != NULL) {
-                collisions.push_back(map[i]->data);
-                collisions.push_back((map[i]->next)->data);
-                collisions.push_back(9999999);
+    for (int index = 0; index < hashTSize; index++) {
+        if (index == 27709)
+            cout << map[index] << endl;
+        if (map[index] != NULL) {
+            // cout << "here" << endl;
+            if (map[index]->next != NULL) {
+                collisions.push_back(map[index]->data);
+                collisions.push_back((map[index]->next)->data);
+                collisions.push_back(9999);
             }
         }
     }
