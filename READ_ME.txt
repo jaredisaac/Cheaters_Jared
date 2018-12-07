@@ -10,3 +10,5 @@
 Notes:
 	<chunkNumber> should be greater than 0. (> 5 is prefered)
 	<minimum collisions> is recommended to be greater than 100
+	cheatersMain.cpp is main driver program
+	hashTable.cpp & hashTable.h declare the hashTable class and associated functions

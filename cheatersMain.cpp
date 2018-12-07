@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         return 1;   // Only continue with program if proper number of arguments have been given
 
     if (atoi(argv[2]) < 0)
-	return 1;
+	    return 1;
     hashTable *h = new hashTable;
 
     const int chunkSize = atoi(argv[2]);
